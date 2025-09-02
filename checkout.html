@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Checkout — M Store</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body { font-family: Montserrat, system-ui, sans-serif; margin:0; background:#f9fafb; color:#111827; }
+  .container { max-width:1100px; margin:40px auto; padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .card { background:#fff; padding:28px; border-radius:16px; box-shadow:0 6px 22px rgba(0,0,0,.08); }
+  h2 { margin:0 0 20px; font-size:20px; }
+  label { display:block; margin-top:12px; font-weight:600; font-size:14px }
+  input, textarea { width:100%; padding:11px 12px; margin-top:6px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+  input:focus, textarea:focus { outline:none; border-color:#2563eb; }
+  .btn { padding:12px 18px; border-radius:10px; background:#2563eb; color:#fff; font-weight:600; border:none; cursor:pointer; transition:0.2s; }
+  .btn:hover { background:#1e40af; transform:scale(1.02); }
+  .btn:disabled { background:#93c5fd; cursor:not-allowed; }
+  .secondary { background:#6b7280 } .secondary:hover { background:#4b5563 }
+  .small { font-size:13px;color:#6b7280 }
+  .cart-item { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #e5e7eb; font-size:14px; }
+  .cart-item:last-child { border-bottom:none }
+  .cart-total { margin-top:16px; font-weight:600; font-size:16px; display:flex; justify-content:space-between; }
+  .price-breakdown { margin-top:8px; font-size:14px; color:#374151; }
+</style>
+</head>
+<body>
+<div class="container">
+  <!-- 🛒 Order Summary -->
+  <div class="card">
+    <h2>Your Order</h2>
+    <div id="cartItems"></div>
+    <div class="price-breakdown">
+      <div class="cart-total"><span>Subtotal:</span><span id="cartSubtotal">Rs 0</span></div>
+      <div class="cart-total"><span>Delivery:</span><span id="cartDelivery">Rs 200</span></div>
+    </div>
+    <div class="cart-total" style="font-size:18px; margin-top:10px; border-top:1px solid #e5e7eb; padding-top:10px">
+      <span>Grand Total:</span>
+      <span id="cartTotal">Rs 0</span>
+    </div>
+  </div>
+
+  <!-- 📋 Checkout Form -->
+  <div class="card">
+    <h2>Checkout</h2>
+    <div>
+    <label for="name">Full Name</label>
+    <input id="name" type="text" />
+
+    <label for="email">Email</label>
+    <input id="email" type="email" />
+
+    <label for="phone">Phone</label>
+    <input id="phone" type="tel" />
+
+    <label for="address">Address</label>
+    <textarea id="address" rows="3"></textarea>
+  </div>
+
+    <div style="margin-top:16px">
+      <label>Payment Method</label>
+      <div style="margin-top:8px">
+        <label><input type="radio" name="pm" value="card" checked/> Credit/Debit Card</label><br/>
+        <label><input type="radio" name="pm" value="jazzcash"/> JazzCash</label>
+      </div>
+    </div>
+
+    <div style="margin-top:20px; display:flex; gap:12px">
+      <button id="payBtn" class="btn">Pay Now</button>
+      <button id="cancelBtn" class="btn secondary">Cancel</button>
+    </div>
+    <div id="info" class="small" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<script>
+  // --- Load cart ---
+  function loadCart() {
+    try { return JSON.parse(localStorage.getItem("cart")) || []; }
+    catch(e){ return []; }
+  }
+
+  function renderCart() {
+    const cart = loadCart();
+    const cartItemsDiv = document.getElementById("cartItems");
+    if(cart.length === 0){
+      cartItemsDiv.innerHTML = "<p class='small'>Your cart is empty.</p>";
+      document.getElementById("cartSubtotal").innerText = "Rs 0";
+      document.getElementById("cartTotal").innerText = "Rs 0";
+      return;
+    }
+
+    let subtotal = 0;
+    cartItemsDiv.innerHTML = cart.map(it=>{
+      const lineTotal = (it.qty||1)*(it.price||0);
+      subtotal += lineTotal;
+      return `<div class="cart-item">
+        <span>${it.name || "Product"} (${it.size || "-"}) x${it.qty}</span>
+        <span>Rs ${lineTotal}</span>
+      </div>`;
+    }).join("");
+
+    const delivery = 200;
+    document.getElementById("cartSubtotal").innerText = "Rs " + subtotal;
+    document.getElementById("cartDelivery").innerText = "Rs " + delivery;
+    document.getElementById("cartTotal").innerText = "Rs " + (subtotal + delivery);
+  }
+
+  renderCart();
+
+  // --- Cancel ---
+  document.getElementById("cancelBtn").addEventListener("click", ()=>{
+    window.location.href = "/";
+  });
+
+  // --- Pay ---
+  document.getElementById("payBtn").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const pm = document.querySelector('input[name="pm"]:checked').value;
+    const cart = loadCart();
+
+    if(cart.length === 0){ alert("Cart is empty"); return; }
+    if(!name || !email){ alert("Please enter name and email"); return; }
+
+    const subtotal = cart.reduce((sum,it)=> sum + (it.qty||1)*(it.price||0), 0);
+    const payload = {
+      customer: { name, email, phone, address },
+      items: cart,
+      amount: subtotal + 200,
+      payment_method: pm
+    };
+
+    document.getElementById("info").innerText = "Processing order...";
+
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if(res.ok){
+        if(pm === "card" && data.sessionUrl){
+          window.location.href = data.sessionUrl; // Stripe checkout
+        } else {
+          // JazzCash / cash
+          alert("Order placed successfully! Ref: " + (data.reference || ""));
+          localStorage.removeItem("cart");
+          window.location.href = "/success";
+        }
+      } else {
+        throw new Error(data.error || "Order failed");
+      }
+    } catch(err) {
+      console.error(err);
+      alert("Error: " + err.message);
+      document.getElementById("info").innerText = "";
+    }
+  });
+</script>
+</body>
+</html>

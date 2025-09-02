@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+/* ---- ✨ Attractive theme additions (safe, layered) ✨ ---- */
+@layer base {
+  :root {
+    --bg: 248 250 252;         /* slate-50 */
+    --ink: 15 23 42;           /* slate-900 */
+    --muted: 241 245 249;      /* slate-100 */
+    --card: 255 255 255;       /* white */
+    --ring: 59 130 246;        /* blue-500 */
+  }
+  .dark {
+    --bg: 11 18 32;            /* custom deep */
+    --ink: 226 232 240;        /* slate-200 */
+    --muted: 15 23 42;         /* slate-900 */
+    --card: 17 24 39;          /* slate-900 */
+    --ring: 56 189 248;        /* sky-400 */
+  }
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    background-color: rgb(var(--bg));
+    color: rgb(var(--ink));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* subtle grid pattern */
+    background-image:
+      radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+      linear-gradient(180deg, rgba(2,6,23,0) 0%, rgba(2,6,23,0.04) 100%);
+    background-size: 18px 18px, auto;
+    background-position: 0 0, 0 0;
+  }
+}
+
+@layer components {
+  .container-pro {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  .card {
+    @apply rounded-2xl border border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-soft transition-all;
+  }
+  .hover-lift {
+    @apply hover:-translate-y-1 hover:shadow-lg;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 font-medium transition-all duration-200;
+  }
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 active:scale-[.98] shadow-md;
+  }
+  .btn-outline {
+    @apply btn border border-primary-600 text-primary-700 hover:bg-primary-50 dark:text-primary-300 dark:border-primary-400 dark:hover:bg-white/10;
+  }
+  .tag {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-primary-50 text-primary-700 dark:bg-white/10 dark:text-primary-300;
+  }
+  .input {
+    @apply w-full rounded-xl border border-gray-300/70 bg-white/70 dark:bg-white/5 dark:border-white/10 px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary-500/50;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}
+
+
+
+/* ---- Additional full-site style system ---- */
+
+/* Header */
+.header-glass {
+  @apply sticky top-0 z-40 backdrop-blur bg-white/60 dark:bg-black/40 border-b border-white/10 dark:border-black/20;
+}
+.nav-link {
+  @apply relative inline-block px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors;
+}
+.nav-link::after {
+  content: '';
+  @apply absolute left-1/2 -bottom-1 w-0 h-[2px] bg-primary-600 transition-all;
+  transform: translateX(-50%);
+}
+.nav-link:hover::after { @apply w-8; }
+
+/* Hero */
+.hero-graphic {
+  @apply absolute -right-24 -top-16 w-64 h-64 rounded-full opacity-30 blur-3xl pointer-events-none;
+  background: radial-gradient(circle at 30% 30%, rgba(99,102,241,0.25), transparent 25%),
+              radial-gradient(circle at 70% 70%, rgba(56,189,248,0.18), transparent 25%);
+}
+.hero-title {
+  background: linear-gradient(90deg, rgb(14 165 233), rgb(59 130 246));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Product card image hover */
+.product-img-wrap { @apply overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-800; }
+.product-img-wrap img { @apply transform transition-transform duration-500 ease-out; }
+.product-img-wrap:hover img { transform: scale(1.08); }
+
+/* Form inputs */
+.form-field { @apply input px-4 py-3 rounded-2xl border border-gray-200 dark:border-white/10; }
+.form-submit { @apply btn btn-primary w-full py-3 rounded-2xl; }
+
+/* Footer */
+.footer-top {
+  @apply border-t border-gray-200 dark:border-gray-800 pt-8 mt-12;
+}
+
+/* Small utilities */
+.pulse-on-hover:hover { animation: pulse 1s ease-in-out; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }

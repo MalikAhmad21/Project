@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>M - Premium Sportswear for Modern Athletes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  
+<script>
+  window.addEventListener('openImageModal', (e)=>{
+    const imgs = e.detail || [];
+    if(imgs.length===0) return;
+    let modal = document.getElementById('__img_modal__');
+    if(!modal){
+      modal = document.createElement('div'); modal.id='__img_modal__'; modal.style.position='fixed'; modal.style.inset=0; modal.style.display='none'; modal.style.background='rgba(0,0,0,0.6)'; modal.style.zIndex=9999; modal.style.justifyContent='center'; modal.style.alignItems='center'; document.body.appendChild(modal);
+    }
+    let i=0;
+    modal.innerHTML = '<div style="background:#fff;padding:8px;border-radius:8px;width:25vw;max-width:360px"><img id="__modal_img__" src="'+imgs[0]+'" style="width:100%" /><div style="text-align:right;margin-top:6px"><button id="__img_close__">Close</button></div></div>';
+    modal.style.display='flex';
+    document.getElementById('__img_close__').onclick = ()=> modal.style.display='none';
+    if(window.__img_interval) clearInterval(window.__img_interval);
+    window.__img_interval = setInterval(()=>{
+      i = (i+1)%imgs.length;
+      document.getElementById('__modal_img__').src = imgs[i];
+    }, 2200);
+  });
+</script>
+</body>
+</html>
