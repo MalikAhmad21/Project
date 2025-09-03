@@ -29,7 +29,7 @@ const Header: React.FC = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <img src="/vite.svg" alt="SiteLogo" className="h-10 w-auto" />
+<img src="/vite.svg" alt="SiteLogo" className="h-10 w-auto" />
             <div className="text-lg font-semibold text-primary">M</div>
           </div>
 
